@@ -15,11 +15,14 @@ import pro.gravit.launchserver.auth.mix.MixProvider;
 import pro.gravit.launchserver.auth.password.PasswordVerifier;
 import pro.gravit.launchserver.auth.protect.ProtectHandler;
 import pro.gravit.launchserver.auth.texture.TextureProvider;
+import pro.gravit.launchserver.cli.CliExecutor;
 import pro.gravit.launchserver.components.Component;
 import pro.gravit.launchserver.config.LaunchServerConfig;
 import pro.gravit.launchserver.config.LaunchServerRuntimeConfig;
 import pro.gravit.launchserver.manangers.CertificateManager;
 import pro.gravit.launchserver.manangers.LaunchServerGsonManager;
+import pro.gravit.launchserver.modules.events.LaunchServerFullInitEvent;
+import pro.gravit.launchserver.modules.events.LaunchServerProfilesSyncEvent;
 import pro.gravit.launchserver.modules.impl.LaunchServerModulesManager;
 import pro.gravit.launchserver.socket.WebSocketService;
 import pro.gravit.utils.command.CommandHandler;
@@ -190,6 +193,18 @@ public class LaunchServerStarter {
                 .setLaunchServerConfigManager(launchServerConfigManager)
                 .setCertificateManager(certificateManager)
                 .build();
+
+        if (args.length > 0) {
+            /* we want to ensure that all modules have been loaded before execute command because
+            some of them depends on loaded modules (e.g. generatecertificate) */
+            server.syncProfilesDir();
+            server.modulesManager.invokeEvent(new LaunchServerProfilesSyncEvent(server));
+            server.modulesManager.fullInitializedLaunchServer(server);
+            server.modulesManager.invokeEvent(new LaunchServerFullInitEvent(server));
+            CliExecutor.execute(server.commandHandler, args);
+            return;
+        }
+
         if (!prepareMode) {
             server.run();
         } else {
