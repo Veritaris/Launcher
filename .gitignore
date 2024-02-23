@@ -1,2 +1,7 @@
 /target
 /dist
+/.venv/
+__pycache__
+.mypy
+.DS_Store
+/.ipynb_checkpoints/
