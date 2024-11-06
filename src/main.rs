@@ -45,13 +45,15 @@ fn str_to_bytes(string: &str) -> Vec<u8> {
 }
 
 fn main() {
-    const IV_VECTOR: &[u8] = b"ivvector";
-    const IV_VECTOR_STR: &str = "ivvectorstr";
-    const KEY: &str = "secretkey";
+    const IV_VECTOR: &[u8] = b"8u3d90ikr7o67lsq";
+    const IV_VECTOR_STR: &str = "8u3d90ikr7o67lsq";
+    const KEY: &str = "32655682f8e21b3379a158b4f9a822e3";
+
     let mut ivvec = vec![];
     for i in 0..IV_VECTOR_STR.len() {
         ivvec.push(IV_VECTOR[i]);
     }
+
     let kp128 = str_to_bytes(KEY);
     let iv_bytes: &[u8] = ivvec.as_slice();
     let key_bytes: &[u8] = kp128.as_slice();
@@ -73,14 +75,35 @@ fn main() {
 
     encrypt_cipher_128.encrypt_block(&mut encrypt_block_128);
 
-
+    println!("target encrypted password: egbPLoP6HpOhc5QMLAOwgw==");
     // println!("b64 encoded aes128 encrypted password: {:?}", general_purpose::STANDARD.encode(encrypt_block_128));
 
     let cipher = Cipher::new_128(<&[u8; 16]>::try_from(key_bytes).unwrap());
     let encrypted = cipher.cbc_encrypt(ivvec.as_slice(), password.as_bytes());
     println!("b64 encoded aes128 encrypted password: {:?}", general_purpose::STANDARD.encode(encrypted));
 
+    // let externally_encrypted = general_purpose::STANDARD.decode("egbPLoP6HpOhc5QMLAOwgw==").unwrap();
+    // let mut decrypt_block = GenericArray::clone_from_slice(externally_encrypted.as_slice());
+    // let mut decrypt_block = encrypt_block.clone();
 
+    // println!("before decrypt: {:?}", decrypt_block);
+    //
+    // let decrypt_cipher = Aes256::new(key_256);
+    // decrypt_cipher.decrypt_block(&mut decrypt_block);
+    // println!("after decrypt raw: {:?}", decrypt_block);
+    // match String::from_utf8(Vec::from(decrypt_block.as_slice())) {
+    //     Ok(val) => {
+    //         println!("after decrypt: {:?}", val);
+    //     }
+    //     Err(_) => {
+    //         println!("unable to decode to utf-8");
+    //     }
+    // }
+
+//     egbPLoP6HpOhc5QMLAOwgw== target encoded password
+//     et/EnHs8+fGF5AlsLHVksA== AES128 encoded password with key c97f9c5b06f9590d
+//     LjLvxmyLs3I0nTOidQ05Tw== AES256 encoded password with key 32655682f8e21b3379a158b4f9a822e3
+//     yeVdprSFfEZ6Y23EWsUWqQ==
 }
 
 // When compiling to web using trunk:
